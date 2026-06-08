@@ -18,6 +18,8 @@ const FRONTEND_URL = `http://127.0.0.1:${FRONTEND_PORT}`
 const API_HEALTH_URL = `http://127.0.0.1:${BACKEND_PORT}/health`
 const ROOT_DIR = path.resolve(__dirname, '..')
 const APP_DISPLAY_NAME = 'Facturamas'
+const APP_WEBSITE_URL = 'http://facturamas.es/'
+const APP_LICENSE = 'MIT'
 const VERSION_STATE_FILENAME = 'installed-version.json'
 const DATA_BACKUP_DIRNAME = 'upgrade-backups'
 const DATA_DIR_NAMES = ['mongo-data', 'pdfs', 'logos']
@@ -339,12 +341,37 @@ async function shutdownServices() {
   }
 }
 
+async function showAboutDialog() {
+  const result = await dialog.showMessageBox(mainWindow || undefined, {
+    type: 'info',
+    title: `Acerca de ${APP_DISPLAY_NAME}`,
+    message: APP_DISPLAY_NAME,
+    detail: [
+      `Version: ${app.getVersion()}`,
+      `Licencia: ${APP_LICENSE}`,
+      '',
+      'Aplicacion de escritorio open source para facturas, presupuestos, clientes y programaciones recurrentes.',
+      '',
+      `Web: ${APP_WEBSITE_URL}`,
+    ].join('\n'),
+    icon: getAppIconPath(),
+    buttons: ['Abrir web', 'Cerrar'],
+    defaultId: 1,
+    cancelId: 1,
+    noLink: true,
+  })
+
+  if (result.response === 0) {
+    await shell.openExternal(APP_WEBSITE_URL)
+  }
+}
+
 function createMenu() {
   const template = [
     {
-      label: 'Aplicacion',
+      label: APP_DISPLAY_NAME,
       submenu: [
-        { role: 'about', label: 'Acerca de Facturamas' },
+        { label: `Acerca de ${APP_DISPLAY_NAME}`, click: showAboutDialog },
         { type: 'separator' },
         { role: 'quit', label: 'Salir' },
       ],
@@ -379,8 +406,17 @@ function createMenu() {
       label: 'Ayuda',
       submenu: [
         {
+          label: `Acerca de ${APP_DISPLAY_NAME}`,
+          click: showAboutDialog,
+        },
+        { type: 'separator' },
+        {
           label: 'Abrir en navegador',
           click: () => shell.openExternal(FRONTEND_URL),
+        },
+        {
+          label: 'Web de Facturamas',
+          click: () => shell.openExternal(APP_WEBSITE_URL),
         },
       ],
     },
