@@ -295,13 +295,15 @@ function startBackend(userDataDir) {
     }
 
     backendProcess = spawn(backendExecutable, [], {
-      stdio: 'inherit',
+      stdio: process.platform === 'win32' ? 'ignore' : 'inherit',
+      windowsHide: true,
       env,
     })
   } else {
     backendProcess = spawn('go', ['run', 'cmd/main.go'], {
       cwd: path.join(ROOT_DIR, 'backend'),
       stdio: 'inherit',
+      windowsHide: true,
       env,
     })
   }

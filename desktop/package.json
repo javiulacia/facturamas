@@ -9,7 +9,7 @@
   "scripts": {
     "build:backend": "npm run build:backend:mac",
     "build:backend:mac": "rm -f bin/facturamas-backend.exe && cd ../backend && GOOS=darwin GOARCH=arm64 go build -o ../desktop/bin/facturamas-backend ./cmd/main.go",
-    "build:backend:win": "rm -f bin/facturamas-backend && cd ../backend && GOOS=windows GOARCH=amd64 go build -o ../desktop/bin/facturamas-backend.exe ./cmd/main.go",
+    "build:backend:win": "rm -f bin/facturamas-backend && cd ../backend && GOOS=windows GOARCH=amd64 go build -ldflags='-H=windowsgui' -o ../desktop/bin/facturamas-backend.exe ./cmd/main.go",
     "build:frontend": "cd ../frontend && VITE_API_URL=http://127.0.0.1:3001/api npm run build -- --outDir ../desktop/frontend-dist --emptyOutDir",
     "build:desktop": "npm run build:desktop:mac",
     "build:desktop:mac": "npm run build:frontend && npm run build:backend:mac",
