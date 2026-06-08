@@ -1,13 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
 
 const CURRENT_VERSION = '1.0.0'
-const VERSION_ENDPOINT = import.meta.env.VITE_VERSION_URL || 'https://facturamas.es/version.json'
+const VERSION_ENDPOINT =
+  import.meta.env.VITE_VERSION_URL || 'https://api.github.com/repos/javiulacia/facturamas/releases/latest'
 const DISMISSED_VERSION_KEY = 'facturamas.dismissedVersion'
 
 interface VersionInfo {
   latestVersion?: string
   releaseUrl?: string
   releaseNotes?: string
+}
+
+interface GitHubRelease {
+  tag_name?: string
+  html_url?: string
+  body?: string
 }
 
 function normalizeVersion(version?: string) {
@@ -30,6 +37,18 @@ function compareVersions(left: string, right: string) {
   return 0
 }
 
+function normalizeVersionInfo(data: VersionInfo | GitHubRelease): VersionInfo {
+  if ('tag_name' in data || 'html_url' in data) {
+    return {
+      latestVersion: data.tag_name,
+      releaseUrl: data.html_url,
+      releaseNotes: data.body,
+    }
+  }
+
+  return data as VersionInfo
+}
+
 export default function UpdateNotice() {
   const [versionInfo, setVersionInfo] = useState<VersionInfo | null>(null)
   const [dismissedVersion, setDismissedVersion] = useState(() => {
@@ -48,8 +67,8 @@ export default function UpdateNotice() {
 
         if (!response.ok) return
 
-        const data = (await response.json()) as VersionInfo
-        setVersionInfo(data)
+        const data = (await response.json()) as VersionInfo | GitHubRelease
+        setVersionInfo(normalizeVersionInfo(data))
       } catch (error) {
         if (!controller.signal.aborted) {
           console.info('No se pudo comprobar la version de Facturamas:', error)
