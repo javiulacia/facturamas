@@ -17,8 +17,9 @@
     "start": "npm run build:desktop && env -u ELECTRON_RUN_AS_NODE electron .",
     "dev": "npm run build:desktop && env -u ELECTRON_RUN_AS_NODE electron .",
     "package": "npm run package:mac",
-    "package:mac": "npm run build:desktop:mac && env -u ELECTRON_RUN_AS_NODE electron-packager . \"Facturamas\" --platform=darwin --arch=arm64 --overwrite --out=out --prune=true --app-bundle-id=com.deepcom.facturamas --icon=assets/app --ignore='^/out($|/)'",
-    "package:win": "npm run build:desktop:win && env -u ELECTRON_RUN_AS_NODE electron-packager . \"Facturamas\" --platform=win32 --arch=x64 --overwrite --out=out --prune=true --app-bundle-id=com.deepcom.facturamas --icon=assets/app --ignore='^/out($|/)'",
+    "sign:mac": "codesign --force --deep --sign - --timestamp=none \"out/Facturamas-darwin-arm64/Facturamas.app\"",
+    "package:mac": "npm run build:desktop:mac && env -u ELECTRON_RUN_AS_NODE electron-packager . \"Facturamas\" --platform=darwin --arch=arm64 --overwrite --out=out --prune=true --app-bundle-id=com.deepcom.facturamas --icon=assets/app.icns --asar.unpackDir=bin --ignore='^/out($|/)' && npm run sign:mac",
+    "package:win": "npm run build:desktop:win && env -u ELECTRON_RUN_AS_NODE electron-packager . \"Facturamas\" --platform=win32 --arch=x64 --overwrite --out=out --prune=true --app-bundle-id=com.deepcom.facturamas --icon=assets/app.ico --asar.unpackDir=bin --ignore='^/out($|/)'",
     "install-app": "npm run package && rm -rf \"/Applications/Facturamas.app\" && cp -R \"out/Facturamas-darwin-arm64/Facturamas.app\" \"/Applications/Facturamas.app\"",
     "update-app": "npm run install-app"
   },

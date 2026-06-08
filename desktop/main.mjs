@@ -43,6 +43,10 @@ function getFrontendDistDir() {
 
 function getBackendExecutable() {
   const executableName = process.platform === 'win32' ? 'facturamas-backend.exe' : 'facturamas-backend'
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, 'app.asar.unpacked', 'bin', executableName)
+  }
+
   return path.join(getAppRootDir(), 'bin', executableName)
 }
 
