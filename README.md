@@ -80,6 +80,13 @@ Facturamas está diseñado como una aplicación local. En la versión de escrito
 
 La aplicación no necesita enviar facturas ni clientes a servidores externos para funcionar. Los backups pueden exportarse e importarse manualmente desde la sección de configuración.
 
+En las versiones empaquetadas para escritorio, los datos no se guardan dentro de la aplicación instalada. Se guardan en el directorio estable de datos del usuario:
+
+- macOS: `~/Library/Application Support/Facturamas`
+- Windows: `%APPDATA%\Facturamas`
+
+Esto permite reemplazar la app por una versión nueva sin perder facturas, presupuestos, clientes, PDFs ni configuración. Además, al detectar un cambio de versión, Facturamas crea automáticamente una copia previa de `mongo-data/`, `pdfs/` y `logos/` dentro de `upgrade-backups/`, conservando las 5 copias de actualización más recientes.
+
 ## Stack técnico
 
 ### Frontend

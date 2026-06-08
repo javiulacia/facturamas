@@ -47,6 +47,27 @@ npm install
 npm run package:win
 ```
 
+## Datos persistentes y actualizaciones
+
+Los datos de usuario no se guardan dentro de la carpeta de instalación ni dentro del `.app`/paquete Windows. La app usa el directorio estable de datos de Electron para `Facturamas`:
+
+- macOS: `~/Library/Application Support/Facturamas`
+- Windows: `%APPDATA%\Facturamas`
+
+Dentro de esa carpeta se guardan:
+
+- `mongo-data/`: base de datos local.
+- `pdfs/`: PDFs generados.
+- `logos/`: logos subidos en configuración.
+
+Al instalar una versión nueva, el usuario puede reemplazar la aplicación sin borrar esos datos. Además, cuando Facturamas detecta un cambio de versión al arrancar, crea una copia previa en:
+
+```text
+upgrade-backups/
+```
+
+Se conservan automáticamente las 5 copias de actualización más recientes.
+
 ## Instalar o actualizar en `Applications`
 
 ```bash

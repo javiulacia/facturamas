@@ -18,12 +18,18 @@ const FRONTEND_URL = `http://127.0.0.1:${FRONTEND_PORT}`
 const API_HEALTH_URL = `http://127.0.0.1:${BACKEND_PORT}/health`
 const ROOT_DIR = path.resolve(__dirname, '..')
 const APP_DISPLAY_NAME = 'Facturamas'
+const VERSION_STATE_FILENAME = 'installed-version.json'
+const DATA_BACKUP_DIRNAME = 'upgrade-backups'
+const DATA_DIR_NAMES = ['mongo-data', 'pdfs', 'logos']
+const MAX_UPGRADE_BACKUPS = 5
 
 let mainWindow = null
 let staticServer = null
 let backendProcess = null
 let mongoServer = null
 let quitting = false
+
+app.setName(APP_DISPLAY_NAME)
 
 function getAppRootDir() {
   return app.isPackaged ? app.getAppPath() : __dirname
@@ -40,6 +46,110 @@ function getBackendExecutable() {
 
 function getAppIconPath() {
   return path.join(getAppRootDir(), 'assets', 'app.png')
+}
+
+function sanitizeVersion(value) {
+  return String(value || 'unknown').replace(/[^a-zA-Z0-9._-]/g, '-')
+}
+
+function getVersionStatePath(userDataDir) {
+  return path.join(userDataDir, VERSION_STATE_FILENAME)
+}
+
+function readInstalledVersion(userDataDir) {
+  try {
+    const statePath = getVersionStatePath(userDataDir)
+    if (!fs.existsSync(statePath)) {
+      return ''
+    }
+
+    const state = JSON.parse(fs.readFileSync(statePath, 'utf8'))
+    return typeof state.version === 'string' ? state.version : ''
+  } catch (error) {
+    console.warn('No se pudo leer la version instalada anterior:', error)
+    return ''
+  }
+}
+
+function writeInstalledVersion(userDataDir) {
+  const state = {
+    version: app.getVersion(),
+    updatedAt: new Date().toISOString(),
+  }
+
+  fs.writeFileSync(getVersionStatePath(userDataDir), `${JSON.stringify(state, null, 2)}\n`)
+}
+
+function hasExistingUserData(userDataDir) {
+  return DATA_DIR_NAMES.some((dirName) => {
+    const sourcePath = path.join(userDataDir, dirName)
+    return fs.existsSync(sourcePath) && fs.readdirSync(sourcePath).length > 0
+  })
+}
+
+function cleanupOldUpgradeBackups(backupsRoot) {
+  if (!fs.existsSync(backupsRoot)) {
+    return
+  }
+
+  const backups = fs.readdirSync(backupsRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => {
+      const fullPath = path.join(backupsRoot, entry.name)
+      return {
+        name: entry.name,
+        path: fullPath,
+        createdAt: fs.statSync(fullPath).mtimeMs,
+      }
+    })
+    .sort((left, right) => right.createdAt - left.createdAt)
+
+  backups.slice(MAX_UPGRADE_BACKUPS).forEach((backup) => {
+    fs.rmSync(backup.path, { recursive: true, force: true })
+  })
+}
+
+function createUpgradeBackupIfNeeded(userDataDir) {
+  const currentVersion = app.getVersion()
+  const previousVersion = readInstalledVersion(userDataDir)
+
+  if (previousVersion === currentVersion || !hasExistingUserData(userDataDir)) {
+    return
+  }
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+  const fromVersion = sanitizeVersion(previousVersion || 'unknown')
+  const toVersion = sanitizeVersion(currentVersion)
+  const backupsRoot = path.join(userDataDir, DATA_BACKUP_DIRNAME)
+  const backupDir = path.join(backupsRoot, `${timestamp}-from-${fromVersion}-to-${toVersion}`)
+
+  fs.mkdirSync(backupDir, { recursive: true })
+
+  DATA_DIR_NAMES.forEach((dirName) => {
+    const sourcePath = path.join(userDataDir, dirName)
+    if (!fs.existsSync(sourcePath)) {
+      return
+    }
+
+    fs.cpSync(sourcePath, path.join(backupDir, dirName), {
+      recursive: true,
+      force: true,
+      errorOnExist: false,
+    })
+  })
+
+  fs.writeFileSync(
+    path.join(backupDir, 'backup-info.json'),
+    `${JSON.stringify({
+      appName: APP_DISPLAY_NAME,
+      fromVersion: previousVersion || null,
+      toVersion: currentVersion,
+      createdAt: new Date().toISOString(),
+      userDataDir,
+    }, null, 2)}\n`
+  )
+
+  cleanupOldUpgradeBackups(backupsRoot)
 }
 
 function requestOk(url) {
@@ -201,6 +311,7 @@ async function ensureServices() {
   startStaticServer()
 
   const userDataDir = app.getPath('userData')
+  createUpgradeBackupIfNeeded(userDataDir)
   await startMongo(userDataDir)
   startBackend(userDataDir)
 
@@ -208,6 +319,8 @@ async function ensureServices() {
   if (!ready) {
     throw new Error('No se pudo iniciar la version desktop dentro del tiempo esperado.')
   }
+
+  writeInstalledVersion(userDataDir)
 }
 
 async function shutdownServices() {
