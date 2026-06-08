@@ -1,14 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 
-const CURRENT_VERSION = '1.0.1'
+const CURRENT_VERSION = '1.0.2'
 const VERSION_ENDPOINT =
-  import.meta.env.VITE_VERSION_URL || 'https://api.github.com/repos/javiulacia/facturamas/releases/latest'
+  import.meta.env.VITE_VERSION_URL || 'https://facturamas.es/version.json'
 const DISMISSED_VERSION_KEY = 'facturamas.dismissedVersion'
 
 interface VersionInfo {
   latestVersion?: string
   releaseUrl?: string
   releaseNotes?: string
+  downloads?: {
+    windows?: string
+    macos?: string
+  }
 }
 
 interface GitHubRelease {
@@ -47,6 +51,21 @@ function normalizeVersionInfo(data: VersionInfo | GitHubRelease): VersionInfo {
   }
 
   return data as VersionInfo
+}
+
+function getPlatformDownloadUrl(versionInfo: VersionInfo) {
+  const platform = window.navigator.platform.toLowerCase()
+  const userAgent = window.navigator.userAgent.toLowerCase()
+
+  if (platform.includes('win') || userAgent.includes('windows')) {
+    return versionInfo.downloads?.windows
+  }
+
+  if (platform.includes('mac') || userAgent.includes('mac os')) {
+    return versionInfo.downloads?.macos
+  }
+
+  return versionInfo.releaseUrl
 }
 
 export default function UpdateNotice() {
@@ -89,7 +108,7 @@ export default function UpdateNotice() {
 
   if (!hasUpdate || !versionInfo?.latestVersion) return null
 
-  const releaseUrl = versionInfo.releaseUrl || 'https://github.com/javiulacia/facturamas/releases'
+  const downloadUrl = getPlatformDownloadUrl(versionInfo) || versionInfo.releaseUrl || 'https://facturamas.es/#descargar'
 
   const dismiss = () => {
     const latestVersion = normalizeVersion(versionInfo.latestVersion)
@@ -108,7 +127,7 @@ export default function UpdateNotice() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <a
-            href={releaseUrl}
+            href={downloadUrl}
             target="_blank"
             rel="noreferrer"
             className="rounded-md bg-blue-700 px-3 py-2 font-medium text-white hover:bg-blue-800"

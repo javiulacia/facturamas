@@ -90,6 +90,14 @@ npm install
 npm run package:win
 ```
 
+El comando genera un instalador NSIS en:
+
+```text
+desktop/out/Facturamas-Setup-VERSION-x64.exe
+```
+
+La instalacion es por usuario y mantiene los datos en `%APPDATA%\Facturamas`, por lo que instalar una version nueva no borra facturas, presupuestos, clientes, PDFs ni configuracion.
+
 Si no hay certificado configurado, el paquete Windows se genera sin firma Authenticode. Windows puede mostrar avisos de SmartScreen o de seguridad indicando que no se puede comprobar el editor.
 
 Para distribuir a terceros con menos avisos, necesitas un certificado de firma de codigo para Windows. Con un `.pfx`:
