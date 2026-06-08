@@ -178,6 +178,15 @@ cd desktop
 npm run package:mac
 ```
 
+Para distribucion publica en macOS sin avisos de Gatekeeper, instala un certificado `Developer ID Application`, configura `MAC_CODESIGN_IDENTITY` y ejecuta:
+
+```bash
+cd desktop
+npm run package:mac:notarized
+```
+
+Consulta [`desktop/README.md`](desktop/README.md) para las variables de notarizacion de Apple.
+
 ### Generar paquete Windows
 
 ```bash

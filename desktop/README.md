@@ -39,6 +39,49 @@ La app se generará en:
 desktop/out/Facturamas-darwin-arm64/Facturamas.app
 ```
 
+Si `MAC_CODESIGN_IDENTITY` no esta definido, el paquete macOS se firma con una firma local ad-hoc. Esto sirve para desarrollo, pero Gatekeeper puede bloquearlo al distribuirlo por internet.
+
+## Generar `.app` notarizada para distribucion publica
+
+Para evitar avisos de Gatekeeper en usuarios finales, necesitas instalar en el llavero de macOS un certificado:
+
+```text
+Developer ID Application: Nombre del desarrollador (TEAMID)
+```
+
+Despues genera el paquete indicando la identidad exacta:
+
+```bash
+cd desktop
+export MAC_CODESIGN_IDENTITY="Developer ID Application: Nombre del desarrollador (TEAMID)"
+npm run package:mac
+```
+
+Para notarizar con Apple, usa una de estas opciones:
+
+```bash
+# Opcion A: perfil guardado previamente en Keychain con xcrun notarytool store-credentials
+export APPLE_NOTARY_KEYCHAIN_PROFILE="facturamas-notary"
+
+# Opcion B: Apple ID y contrasena especifica de app
+export APPLE_ID="tu-apple-id"
+export APPLE_APP_SPECIFIC_PASSWORD="xxxx-xxxx-xxxx-xxxx"
+export APPLE_TEAM_ID="TEAMID"
+
+# Opcion C: App Store Connect API key
+export APPLE_API_KEY="/ruta/segura/AuthKey_KEYID.p8"
+export APPLE_API_KEY_ID="KEYID"
+export APPLE_API_ISSUER="issuer-uuid"
+```
+
+Y ejecuta:
+
+```bash
+npm run package:mac:notarized
+```
+
+No guardes nunca contrasenas, claves `.p8` ni secretos de notarizacion en el repositorio.
+
 ## Generar paquete Windows
 
 ```bash
