@@ -10,6 +10,7 @@ import Settings from './pages/Settings'
 import ClientsPage from './pages/ClientsPage'
 import ContactsPage from './pages/ContactsPage'
 import FiscalCalendarPage from './pages/FiscalCalendarPage'
+import UpdateNotice from './components/UpdateNotice'
 import { profilesAPI, settingsAPI, getStoredActiveProfileId, setStoredActiveProfileId } from './services/api'
 import { Profile } from './types'
 
@@ -144,6 +145,8 @@ function App() {
             </div>
           </div>
         </nav>
+
+        <UpdateNotice />
 
         <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <Routes>
