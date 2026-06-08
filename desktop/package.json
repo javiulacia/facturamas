@@ -1,0 +1,32 @@
+{
+  "name": "facturamas-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Facturamas Desktop",
+  "license": "MIT",
+  "type": "module",
+  "main": "main.mjs",
+  "scripts": {
+    "build:backend": "npm run build:backend:mac",
+    "build:backend:mac": "rm -f bin/facturamas-backend.exe && cd ../backend && GOOS=darwin GOARCH=arm64 go build -o ../desktop/bin/facturamas-backend ./cmd/main.go",
+    "build:backend:win": "rm -f bin/facturamas-backend && cd ../backend && GOOS=windows GOARCH=amd64 go build -o ../desktop/bin/facturamas-backend.exe ./cmd/main.go",
+    "build:frontend": "cd ../frontend && VITE_API_URL=http://127.0.0.1:3001/api npm run build -- --outDir ../desktop/frontend-dist --emptyOutDir",
+    "build:desktop": "npm run build:desktop:mac",
+    "build:desktop:mac": "npm run build:frontend && npm run build:backend:mac",
+    "build:desktop:win": "npm run build:frontend && npm run build:backend:win",
+    "start": "npm run build:desktop && env -u ELECTRON_RUN_AS_NODE electron .",
+    "dev": "npm run build:desktop && env -u ELECTRON_RUN_AS_NODE electron .",
+    "package": "npm run package:mac",
+    "package:mac": "npm run build:desktop:mac && env -u ELECTRON_RUN_AS_NODE electron-packager . \"Facturamas\" --platform=darwin --arch=arm64 --overwrite --out=out --prune=true --app-bundle-id=com.deepcom.facturamas --icon=assets/app --ignore='^/out($|/)'",
+    "package:win": "npm run build:desktop:win && env -u ELECTRON_RUN_AS_NODE electron-packager . \"Facturamas\" --platform=win32 --arch=x64 --overwrite --out=out --prune=true --app-bundle-id=com.deepcom.facturamas --icon=assets/app --ignore='^/out($|/)'",
+    "install-app": "npm run package && rm -rf \"/Applications/Facturamas.app\" && cp -R \"out/Facturamas-darwin-arm64/Facturamas.app\" \"/Applications/Facturamas.app\"",
+    "update-app": "npm run install-app"
+  },
+  "dependencies": {
+    "electron": "^42.3.3",
+    "mongodb-memory-server-core": "^11.2.0"
+  },
+  "devDependencies": {
+    "@electron/packager": "^20.0.1"
+  }
+}
