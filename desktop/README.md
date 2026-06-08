@@ -90,6 +90,26 @@ npm install
 npm run package:win
 ```
 
+Si no hay certificado configurado, el paquete Windows se genera sin firma Authenticode. Windows puede mostrar avisos de SmartScreen o de seguridad indicando que no se puede comprobar el editor.
+
+Para distribuir a terceros con menos avisos, necesitas un certificado de firma de codigo para Windows. Con un `.pfx`:
+
+```bash
+cd desktop
+export WINDOWS_CERTIFICATE_FILE="/ruta/segura/certificado.pfx"
+export WINDOWS_CERTIFICATE_PASSWORD="contrasena-del-certificado"
+npm run package:win
+```
+
+Tambien puedes usar un proveedor HSM/KeyLocker o parametros personalizados de `signtool`:
+
+```bash
+export WINDOWS_SIGN_WITH_PARAMS='sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 ...'
+npm run package:win
+```
+
+No guardes nunca certificados `.pfx`, contrasenas ni claves de firma en el repositorio.
+
 ## Datos persistentes y actualizaciones
 
 Los datos de usuario no se guardan dentro de la carpeta de instalación ni dentro del `.app`/paquete Windows. La app usa el directorio estable de datos de Electron para `Facturamas`:

@@ -19,9 +19,10 @@
     "package": "npm run package:mac",
     "sign:mac": "node scripts/sign-mac.mjs",
     "notarize:mac": "node scripts/notarize-mac.mjs",
+    "sign:win": "node scripts/sign-win.mjs",
     "package:mac": "npm run build:desktop:mac && env -u ELECTRON_RUN_AS_NODE electron-packager . \"Facturamas\" --platform=darwin --arch=arm64 --overwrite --out=out --prune=true --app-bundle-id=com.deepcom.facturamas --icon=assets/app.icns --asar.unpackDir=bin --ignore='^/out($|/)' && npm run sign:mac",
     "package:mac:notarized": "npm run package:mac && npm run notarize:mac",
-    "package:win": "npm run build:desktop:win && env -u ELECTRON_RUN_AS_NODE electron-packager . \"Facturamas\" --platform=win32 --arch=x64 --overwrite --out=out --prune=true --app-bundle-id=com.deepcom.facturamas --icon=assets/app.ico --asar.unpackDir=bin --ignore='^/out($|/)'",
+    "package:win": "npm run build:desktop:win && env -u ELECTRON_RUN_AS_NODE electron-packager . \"Facturamas\" --platform=win32 --arch=x64 --overwrite --out=out --prune=true --app-bundle-id=com.deepcom.facturamas --icon=assets/app.ico --asar.unpackDir=bin --ignore='^/out($|/)' && npm run sign:win",
     "install-app": "npm run package && rm -rf \"/Applications/Facturamas.app\" && cp -R \"out/Facturamas-darwin-arm64/Facturamas.app\" \"/Applications/Facturamas.app\"",
     "update-app": "npm run install-app"
   },
@@ -32,6 +33,7 @@
   "devDependencies": {
     "@electron/notarize": "^3.1.1",
     "@electron/osx-sign": "^2.4.0",
-    "@electron/packager": "^20.0.1"
+    "@electron/packager": "^20.0.1",
+    "@electron/windows-sign": "^2.0.3"
   }
 }
