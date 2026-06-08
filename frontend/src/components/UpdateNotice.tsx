@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
-const CURRENT_VERSION = '1.0.0'
+const CURRENT_VERSION = '1.0.1'
 const VERSION_ENDPOINT =
   import.meta.env.VITE_VERSION_URL || 'https://api.github.com/repos/javiulacia/facturamas/releases/latest'
 const DISMISSED_VERSION_KEY = 'facturamas.dismissedVersion'
